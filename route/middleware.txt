@@ -1,0 +1,25 @@
+import express from "express"
+
+const router=express.Router();
+
+import {createUser,getAllUsers,getSingleUser,updateSingleUSer,deleteSingleUser} from "../controller/user.controller.js"
+
+
+const middleware=(req,res,next)=>{
+       console.log("Middleware Calling");
+       next()
+
+}
+const middleware2=(req,res,next)=>{
+    console.log("Middleware 2 calling")
+    next()
+}
+
+router.post("/user",createUser)
+router.get("/user",[middleware,middleware2],getAllUsers)
+
+router.get("/user/:agee",getSingleUser)
+router.put("/user/:id",updateSingleUSer);
+router.delete("/user/:id",deleteSingleUser)
+
+export {router}
