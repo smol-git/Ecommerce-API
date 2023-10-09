@@ -1,5 +1,5 @@
 import express from "express";
-import { createUser, getAllUser, getSingleUser, updateSingleUser, userLogIn } from "../controller/userController.js";
+import { createUser, getAllUser, getSingleUser, updateSingleUser, userForgetPassword, userLogIn } from "../controller/userController.js";
 import { deleteSingleUser } from "../controller/userController.js";
 
 export const router = express.Router();
@@ -23,3 +23,6 @@ router.delete("/user/:id", deleteSingleUser)
 
 //user login route
 router.post("/login", userLogIn)
+
+//user forget password
+router.post("/verify-user", userForgetPassword)

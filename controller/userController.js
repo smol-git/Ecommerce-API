@@ -44,6 +44,23 @@ try{
 }
 }
 
+export const userForgetPassword = async(req, res) => {
+ try{
+    const{email} = req.body;
+    const user = await User.findOne({email}); // finding email and storing email it in variable user
+    if(!user){
+        return res.status(400).json({message: "Email not register"}); //checking if email is register or not
+    }
+    if(user){
+        res.status(200).json({message: "Email is register, check email for OTP"})  // How to send OTP to user
+    }      
+    
+ }catch(error){
+    res.status(400).json({message: error.message})
+ }
+
+}
+
 
 //get all user function
 export const getAllUser = async (req, res) => {
