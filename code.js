@@ -6,6 +6,7 @@ import { router } from "./route/userRoute.js";
 import { productRouter } from "./route/productRoute.js";
 import dotenv from "dotenv";
 import { cartRouter } from "./route/cartRoute.js";
+import {checkOutRouter} from "./route/checkoutRoute.js";
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.use(bodyParser.json());
 app.use('/api', router);
 app.use('/api', productRouter)
 app.use('/api', cartRouter)
+app.use('/api', checkOutRouter)
 
 // mongoDB connection
 mongoose.connect(process.env.MongoDB_URL)
