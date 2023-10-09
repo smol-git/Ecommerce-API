@@ -25,4 +25,4 @@ router.delete("/user/:id", deleteSingleUser)
 router.post("/login", userLogIn)
 
 //user forget password
-router.post("/verify-user", userForgetPassword)
+router.post("/forget-password", userForgetPassword)

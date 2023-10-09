@@ -2,6 +2,7 @@
 import { createNewUser, getAllUserData, deleteSingleUserData, getSingleUserData, updateSingleUserData } from "../services/userServices.js";
 import User from "../model/userModel.js"
 import bcrypt from "bcrypt"
+import nodeMailer from "nodemailer"
 
 //create user method
 export const createUser = async (req, res) => {
@@ -46,15 +47,28 @@ try{
 
 export const userForgetPassword = async(req, res) => {
  try{
-    const{email} = req.body;
+    const{email, newPassword} = req.body; // OTP code is missing
     const user = await User.findOne({email}); // finding email and storing email it in variable user
     if(!user){
         return res.status(400).json({message: "Email not register"}); //checking if email is register or not
+    }   
+    const transporter = nodeMailer.createTransport({
+        service: "gmail",
+        auth:{
+            user: "sohailahmedwork1@gmail.com",
+            pass: "" // password created from google account app
+        }
+    })
+    const otpGeneratorToken = crypto.randomBytes(6).toString(hex); // random otp generate from crypto  
+    const mailOption = {
+        from:"sohailahmedwork1@gmail.com",
+        to: email,
+        subject: "Sending email",
+        text: `your otp is: ${crypto}`
     }
-    if(user){
-        res.status(200).json({message: "Email is register, check email for OTP"})  // How to send OTP to user
-    }      
-    
+
+    transporter.sendMail(mailOption);
+
  }catch(error){
     res.status(400).json({message: error.message})
  }
