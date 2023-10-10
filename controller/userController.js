@@ -5,8 +5,6 @@ import bcrypt from "bcrypt"
 import nodeMailer from "nodemailer"
 import crypto from "crypto"
 
-let otpGeneratorToken;
-
 //create user method
 export const createUser = async (req, res) => {
     try {
@@ -64,7 +62,10 @@ export const userForgetPassword = async (req, res) => {
             }
         })
         const otpLength = 6;
-        otpGeneratorToken = crypto.randomBytes(otpLength).toString('hex'); // random otp generate from crypto  
+        const otpGeneratorToken = crypto.randomBytes(otpLength).toString('hex'); // random otp generate from crypto  
+        user.resetOtpToken = otpGeneratorToken;
+        await user.save();
+        
         const mailOption = {
             from: "sohailahmedwork1@gmail.com",
             to: email,
@@ -73,8 +74,6 @@ export const userForgetPassword = async (req, res) => {
         }
 
         transporter.sendMail(mailOption);
-
-
 
         res.status(200).json({ message: `OTP sent to ${email} and this OTP is valid till ???` })
     } catch (error) {
@@ -87,14 +86,14 @@ export const userForgetPassword = async (req, res) => {
 export const userOtpVerify = async (req, res) => {
     try {
         const {id} = req.params;
-        const{otpValue} = req.body;
+        const{otpValue, newPassword, confirmNewPassword} = req.body;
         const user = await User.findById(id)
         if(!user){
             return res.status(400).json({ message: "user not register" });
         }
         const expirationTime = Date.now() + 5 * 60 * 1000;
         const otpData = {
-            otp: otpGeneratorToken,
+            otp: user.resetOtpToken,
             expiresAt: expirationTime,
         };
         const providedOtp = otpValue;  // issue resolve

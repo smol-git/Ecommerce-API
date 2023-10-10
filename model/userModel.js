@@ -32,6 +32,12 @@ const userSchema = new mongoose.Schema({
     address:{
         type: String,
 
+    },
+    resetOtpToken:{
+        type: String,
+    },
+    resetTokenExpire:{
+        type: Date,
     }
     // image:{ and isAdmin still remaining
     //     type: String,
