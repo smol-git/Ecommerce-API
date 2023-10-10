@@ -1,5 +1,5 @@
 import express from "express";
-import { createUser, getAllUser, getSingleUser, updateSingleUser, userForgetPassword, userLogIn } from "../controller/userController.js";
+import { createUser, getAllUser, getSingleUser, updateSingleUser, userForgetPassword, userLogIn, userOtpVerify } from "../controller/userController.js";
 import { deleteSingleUser } from "../controller/userController.js";
 
 export const router = express.Router();
@@ -26,3 +26,6 @@ router.post("/login", userLogIn)
 
 //user forget password
 router.post("/forget-password", userForgetPassword)
+
+//user OTP verification
+router.post("/verify-otp/:id", userOtpVerify)
