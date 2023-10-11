@@ -1,6 +1,7 @@
 import express from "express";
-import { addToCart } from "../controller/cartController.js";
+import { addToCart, createCartForUser } from "../controller/cartController.js";
 
 export const cartRouter = express.Router();
 
-cartRouter.post("/add-to-cart/:id", addToCart);
+cartRouter.put("/add-to-cart", addToCart);
+cartRouter.post("/create-user-cart/:id", createCartForUser)
