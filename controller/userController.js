@@ -1,5 +1,5 @@
 //importing functions from services file
-import { createNewUser, getAllUserData, deleteSingleUserData, getSingleUserData, updateSingleUserData } from "../services/userServices.js";
+
 import User from "../model/userModel.js"
 import bcrypt from "bcrypt"
 import nodeMailer from "nodemailer"
@@ -9,15 +9,32 @@ import crypto from "crypto"
 export const createUser = async (req, res) => {
     try {
 
+        const { firstname, lastname, username, email, password, contact, address, age, gender } = req.body;   // req users field for new user creation
+
+    const hashedPassword = await bcrypt.hash(password, 10); // password encryption, 10 means password length
+
         // checking if user already exist by email
-        const { email } = req.body;
+        //const { email } = req.body;
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(200).json({ message: "Email already exists, please try logging in." });
         }
 
         // new register user
-        const newUser = await createNewUser(req);
+        const newUser = await User.create({
+            firstname,
+            lastname,
+            username,
+            email,
+            password: hashedPassword,
+            contact,
+            address,
+            age,
+            gender
+    
+        })
+
+       // const newUser = await createNewUser(req);
         if (newUser) {
             return res.status(200).json(newUser)
         }
@@ -91,7 +108,7 @@ export const userOtpVerify = async (req, res) => {
         if(!user){
             return res.status(400).json({ message: "user not register" });
         }
-        const expirationTime = Date.now() + 5 * 60 * 1000;
+        const expirationTime = Date.now() + 30 * 60 * 1000;
         const otpData = {
             otp: user.resetOtpToken,
             expiresAt: expirationTime,
@@ -100,16 +117,24 @@ export const userOtpVerify = async (req, res) => {
         const currentTimestamp = Date.now();
 
         // Check if the OTP is expired
-        if (currentTimestamp <= otpData.expiresAt) { //issue here
+        if (currentTimestamp <= otpData.expiresAt) {
+            if (providedOtp === otpData.otp) {
+                if (newPassword && confirmNewPassword && newPassword === confirmNewPassword) {
+                    // Update the user's password with the new one
+                    const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-            if (providedOtp === otpData.otp) {           // The provided OTP matches the generated OTP
-                return res.status(200).json({ message: "OTP is valid" })   // Proceed with further actions (e.g., granting access)
+                    user.password = hashedPassword;
+                    
+                    await user.save();
+                    return res.status(200).json({ message: "OTP is valid, and password has been updated" });
+                } else {
+                    return res.status(400).json({ message: "Password and confirm password do not match" });
+                }
             } else {
-                return res.status(400).json({ message: "Invalid OTP" })   // Inform the user that the provided OTP is incorrect
+                return res.status(400).json({ message: "Invalid OTP" });
             }
-
         } else {
-            return res.status(400).json({ message: "OTP is expired" })    // Inform the user that the OTP has expired
+            return res.status(400).json({ message: "OTP is expired" });
         }
     } catch (error) {
         res.status(401).json({ message: error.message })
@@ -120,7 +145,7 @@ export const userOtpVerify = async (req, res) => {
 //get all user function
 export const getAllUser = async (req, res) => {
     try {
-        const users = await getAllUserData();
+        const users = await User.find();
         if (users) {
             res.status(200).json(users)
         }
@@ -132,8 +157,8 @@ export const getAllUser = async (req, res) => {
 //get single user by there specific data 
 export const getSingleUser = async (req, res) => {
     try {
-        // const {age} = req.params;
-        const user = await getSingleUserData(req);
+        const { username } = req.params;
+        const user = await User.findOne({ username: username });
         if (user) {
             res.status(200).json(user)
         }
@@ -147,7 +172,10 @@ export const getSingleUser = async (req, res) => {
 export const updateSingleUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const user = await updateSingleUserData(req);
+        const user = await User.findByIdAndUpdate(id, req.body, {
+            new: true
+        })
+
         if (user) {
             res.status(200).json(user)
         }
@@ -159,8 +187,8 @@ export const updateSingleUser = async (req, res) => {
 //delete single user by id
 export const deleteSingleUser = async (req, res) => {
     try {
-
-        const user = await deleteSingleUserData(req);
+        const { id } = req.params;
+        const user = await User.findByIdAndDelete(id);
         if (user) {
             res.status(200).json({ message: "Successfully deleted User" })
         }
