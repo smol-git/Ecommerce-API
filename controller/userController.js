@@ -63,6 +63,35 @@ export const userLogIn = async (req, res) => {
     }
 }
 
+//reset password
+export const updatePassword = async(req,res) => {
+    try{
+        const{email, oldPassword, newPassword, confirmNewPassword} = req.body;
+        const user = await User.findOne({email});
+        console.log(user.password);
+        const passwordValid = await bcrypt.compare(oldPassword, user.password);
+        if(!user){
+            return res.status(404).send({message: "User doesn't exist"});
+        }
+
+        if (!passwordValid){
+            return res.status(400).send({message: "Please type correct password"});     
+        }
+        
+        if(newPassword !== confirmNewPassword){
+            return res.status(400).send({message: "Please make sure both new passords and confirmed passwords are same"});
+        }
+
+        user.password = await bcrypt.hash(newPassword, 5);
+        await user.save();
+
+        res.status(200).send({message: "Password reset successfuly"});
+
+    } catch (error){
+        res.status(400).send({message: error.message});
+    }
+}
+
 // user forget password, otp is sent it through email
 export const userForgetPassword = async (req, res) => {
     try {
@@ -140,7 +169,6 @@ export const userOtpVerify = async (req, res) => {
         res.status(401).json({ message: error.message })
     }
 }
-
 
 //get all user function
 export const getAllUser = async (req, res) => {
