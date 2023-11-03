@@ -1,7 +1,9 @@
 import express from "express";
-import { checkUserRegister } from "../controller/checkoutController.js";
+import { newOrder, orderStatusUpdate, getUserOrders } from "../controller/checkoutController.js";
 
 
 export const checkOutRouter = express.Router();
 
-checkOutRouter.get("/email-check", checkUserRegister)
+checkOutRouter.post("/orders", newOrder)
+checkOutRouter.put("/orders/:orderId", orderStatusUpdate)
+checkOutRouter.get("/orders/:userId", getUserOrders)

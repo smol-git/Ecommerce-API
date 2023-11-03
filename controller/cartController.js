@@ -60,3 +60,57 @@ export const addToCart = async (req, res) => {
         res.status(400).json(error.message);
     }
 }
+
+//delete cart product
+export const deleteCartProduct = async (req,res) => {
+    try{
+        const {productId} = req.params;
+        const {userId, totalCartPrice} = req.body;
+
+        let cart = await Cart.findOne({userId});
+        if (!cart) {
+            return res.status(404).json({message: "Cart for user doesn't exist"})
+        }
+
+        const productIndex = cart.items.findIndex((item) => item.productId.toString() === productId);
+
+        if (productIndex === -1){
+            return res.status(404).json({ message: 'Product is not in the cart' });
+        }
+
+        console.log(productIndex)
+
+        cart.items.splice(productIndex, 1)    // Revision Needed
+        cart.totalCartPrice = totalCartPrice;
+
+        await cart.save();
+
+        res.status(200).json({message: "Product deleted from cart successfully.", cart})
+
+    } catch (error){
+        res.status(400).json(error.message)
+    }
+}
+
+//get cart
+export const getCartContents = async (req,res) => {
+    try{
+        const {userId} = req.body;
+        let page = req.query.page;
+        let pageLimit = req.query.limit
+        const cart = await Cart.findOne({userId})
+        .populate('userId', 'username email firstName lastName')
+        .populate('items.productId', 'title price productPicUrl')
+        .skip((page-1)*pageLimit)
+        .limit(pageLimit);
+
+        if (!cart) {
+            return res.status(404).json({message: "Cart doesn't exist for the user."})
+        }
+        
+        res.status(200).json(cart);
+
+    } catch (error){
+        res.status(500).json(error.message);
+    }
+}
